@@ -3,11 +3,12 @@ package me.antoniocaccamo.jaxrs.rx.endpoint.rate;
 import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
 import lombok.extern.slf4j.Slf4j;
-import me.antoniocaccamo.jaxrs.rx.exception.CurrencyNotFoundException;
-import me.antoniocaccamo.jaxrs.rx.exception.InternalErrorException;
+import me.antoniocaccamo.jaxrs.rx.endpoint.exception.CurrencyNotFoundException;
+import me.antoniocaccamo.jaxrs.rx.endpoint.exception.InternalErrorException;
 import me.antoniocaccamo.jaxrs.rx.model.ExchangeRatesResponse;
 import me.antoniocaccamo.jaxrs.rx.model.RateResponse;
 import me.antoniocaccamo.jaxrs.rx.service.rate.RateService;
+import org.glassfish.jersey.server.ManagedAsync;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +33,7 @@ public class RateEndpoint {
 
     @GET @Path("{baseCurrency}/{counterCurrency}")
     @Produces(MediaType.APPLICATION_JSON)
+    @ManagedAsync
     public void getRate(@Suspended final AsyncResponse async,
                         @PathParam("baseCurrency")    final String baseCurrency,
                         @PathParam("counterCurrency") final String counterCurrency) {
@@ -43,19 +45,15 @@ public class RateEndpoint {
                 .subscribe(new SingleObserver<ExchangeRatesResponse>() {
                     @Override
                     public void onSubscribe(Disposable disposable) {
-
                     }
 
                     @Override
                     public void onSuccess(ExchangeRatesResponse exchangeRatesResponse) {
-
                         if (exchangeRatesResponse.getRates().containsKey(counterCurrency))
                             response.setRate(exchangeRatesResponse.getRates().get(counterCurrency));
                         else
                             async.resume(new CurrencyNotFoundException());
-
                         outerLatch.countDown();
-
                     }
 
                     @Override

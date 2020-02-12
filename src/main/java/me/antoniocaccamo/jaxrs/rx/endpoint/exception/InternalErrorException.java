@@ -1,4 +1,4 @@
-package me.antoniocaccamo.jaxrs.rx.exception;
+package me.antoniocaccamo.jaxrs.rx.endpoint.exception;
 
 public class InternalErrorException extends Exception {
 
